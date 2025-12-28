@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" dir="auto">
+<html lang="en" dir="auto" data-theme="auto">
 
 <head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -13,7 +13,7 @@ There are enamours reasons to create a separate Room DB for example to get full 
 But we thought that client already has the Room DB set up then why can&rsquo;t we leverage the client Room DB for our library purpose sounds interesting right.">
 <meta name="author" content="">
 <link rel="canonical" href="https://premkumar4701.github.io/posts/room-migration-handling-for-android-libraries/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.d6fcd20a4fb86efa4dfac8ec95da60244cc8871042183da1ef28e3a762ad79c8.css" integrity="sha256-1vzSCk&#43;4bvpN&#43;sjsldpgJEzIhxBCGD2h7yjjp2Ktecg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.6917c33f752d2902fcce2943406f60cb76591197ba6ecc2dbfb6451ea7fa304e.css" integrity="sha256-aRfDP3UtKQL8zilDQG9gy3ZZEZe6bswtv7ZFHqf6ME4=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://premkumar4701.github.io/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://premkumar4701.github.io/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://premkumar4701.github.io/favicon-32x32.png">
@@ -42,23 +42,38 @@ But we thought that client already has the Room DB set up then why can&rsquo;t w
                 --code-block-bg: rgb(46, 46, 51);
                 --code-bg: rgb(55, 56, 62);
                 --border: rgb(51, 51, 51);
+                color-scheme: dark;
             }
 
             .list {
                 background: var(--theme);
             }
 
-            .list:not(.dark)::-webkit-scrollbar-track {
-                background: 0 0;
+            .toc {
+                background: var(--entry);
             }
+        }
 
-            .list:not(.dark)::-webkit-scrollbar-thumb {
-                border-color: var(--theme);
+        @media (prefers-color-scheme: light) {
+            .list::-webkit-scrollbar-thumb {
+                border-color: var(--code-bg);
             }
         }
 
     </style>
-</noscript><meta property="og:url" content="https://premkumar4701.github.io/posts/room-migration-handling-for-android-libraries/">
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else if (localStorage.getItem("pref-theme") === "light") {
+       document.querySelector("html").dataset.theme = 'light';
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.querySelector("html").dataset.theme = 'dark';
+    } else {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://premkumar4701.github.io/posts/room-migration-handling-for-android-libraries/">
   <meta property="og:site_name" content="Prem Kumar J">
   <meta property="og:title" content="Room Migration Handling for Android Libraries">
   <meta property="og:description" content="Introduction Have you ever wondered while creating libraries why are we having a separate Room DB implementation in library ? However we knew that client can Implement Room DB but still we create our Room DB in library Why ?
@@ -127,25 +142,13 @@ But we thought that client already has the Room DB set up then why can&rsquo;t w
 }
 </script>
 </head>
-
-<body class="" id="top">
-<script>
-    if (localStorage.getItem("pref-theme") === "dark") {
-        document.body.classList.add('dark');
-    } else if (localStorage.getItem("pref-theme") === "light") {
-        document.body.classList.remove('dark')
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark');
-    }
-
-</script>
-
-<header class="header">
+<body id="top">
+    <header class="header">
     <nav class="nav">
         <div class="logo">
             <a href="https://premkumar4701.github.io/" accesskey="h" title="Prem Kumar J (Alt + H)">Prem Kumar J</a>
             <div class="logo-switches">
-                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -246,8 +249,7 @@ But we thought that client already has the Room DB set up then why can&rsquo;t w
 <p>Example:</p>
 <p>Client Application 1 : Already has the Room DB set up which is versioned 4 now the client application like to integrate our library then the migration file should be Migration(4, 5).</p>
 <p>Client Application 2 : Already has the Room DB set up which is versioned 9 now the client application like to integrate our library then the migration file should be Migration(9, 10).</p>
-<p>From this we came to know that versioning cannot be hard-coded in migration files at the same time we need to write a migration file in library.</p>
-</blockquote>
+<p>From this we came to know that versioning cannot be hard-coded in migration files at the same time we need to write a migration file in library.</p></blockquote>
 <h3 id="solution">Solution<a hidden class="anchor" aria-hidden="true" href="#solution">#</a></h3>
 <p>We have created 3 functions which is responsible for handling the migrations here we does not care about the versioning of the Room DB the control of versioning is given to client but the migration query is handled by library a bit confusing right ? Yeah but let us see the implementation and then figure it out.</p>
 <p><strong>AppLogMigration.kt</strong> file which holds the migration logic.</p>
@@ -289,8 +291,7 @@ But we thought that client already has the Room DB set up then why can&rsquo;t w
 </span></span><span style="display:flex;"><span>}
 </span></span></code></pre></div><p>Let me explain this two private const val BASE_VERSION -it will be always 1, LATEST_VERSION -it will be updated each time then the library release a version and we have a <strong>Map</strong> of version-to-function mapping based on the <strong>Library Version</strong> provided. The functions inside the map will be the private functions.</p>
 <blockquote>
-<p>For versioning we are following the <a href="https://semver.org/">Semantric Versioning</a>.</p>
-</blockquote>
+<p>For versioning we are following the <a href="https://semver.org/">Semantric Versioning</a>.</p></blockquote>
 <p>Only 3 functions are exposed to client for handling the migration.</p>
 <ul>
 <li>
@@ -304,12 +305,10 @@ But we thought that client already has the Room DB set up then why can&rsquo;t w
 </ul>
 <blockquote>
 <p>Real world use:</p>
-<p>If a client already integrated our library using our 1st migration function at the time library version is 1. Later the library released three new versions where as client is not actively following the releases or actively following but not want to upgrade the library version due to several reasons. After some releases the client thinks that this new release of the library provides some features which is useful for me then now client like to upgrade the dependency version. For instance the client using the library version 1 now client wish to upgrade it to the latest version which is 4. In this scenario client has to use 2nd function in that case the parameters will be fromLibraryVersion -1, toLibraryVersion -4 and the instance of the client Room DB.</p>
-</blockquote>
+<p>If a client already integrated our library using our 1st migration function at the time library version is 1. Later the library released three new versions where as client is not actively following the releases or actively following but not want to upgrade the library version due to several reasons. After some releases the client thinks that this new release of the library provides some features which is useful for me then now client like to upgrade the dependency version. For instance the client using the library version 1 now client wish to upgrade it to the latest version which is 4. In this scenario client has to use 2nd function in that case the parameters will be fromLibraryVersion -1, toLibraryVersion -4 and the instance of the client Room DB.</p></blockquote>
 <p>The 1st and 2nd function will loop through the versions from Base to Latest Version and invoke the <strong>Function Reference Mapping</strong> function based on the  version. The private functions inside the map is responsible for handling the queries for the migration.</p>
 <blockquote>
-<p>BaseVersion(1) to LatestVersion -this various based on the function used. 1st function its always 1 to LatestVersion of the library. 2nd function the parameters will be dynamic means BaseVersion must be the library version which is used in client application its provided by the client (For instance take it has 3) and LatestVersion( Note: It’s not a libraries latest version) it is decided by client until which version client wish to upgrade the library (For instance take it has 5) but the actual LatestVersion of library can be 8 but client wish to upgrade only till the Version 5</p>
-</blockquote>
+<p>BaseVersion(1) to LatestVersion -this various based on the function used. 1st function its always 1 to LatestVersion of the library. 2nd function the parameters will be dynamic means BaseVersion must be the library version which is used in client application its provided by the client (For instance take it has 3) and LatestVersion( Note: It’s not a libraries latest version) it is decided by client until which version client wish to upgrade the library (For instance take it has 5) but the actual LatestVersion of library can be 8 but client wish to upgrade only till the Version 5</p></blockquote>
 <ul>
 <li>
 <p><strong>appLogMigrationForSpecificVersion</strong></p>
@@ -329,7 +328,7 @@ But we thought that client already has the Room DB set up then why can&rsquo;t w
     </main>
     
 <footer class="footer">
-        <span>&copy; 2024 <a href="https://premkumar4701.github.io/">Prem Kumar J</a></span> · 
+        <span>&copy; 2025 <a href="https://premkumar4701.github.io/">Prem Kumar J</a></span> · 
 
     <span>
         Powered by
@@ -344,9 +343,14 @@ But we thought that client already has the Room DB set up then why can&rsquo;t w
 </a>
 
 <script>
-    let menu = document.getElementById('menu')
+    let menu = document.getElementById('menu');
     if (menu) {
-        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
         menu.onscroll = function () {
             localStorage.setItem("menu-scroll-position", menu.scrollLeft);
         }
@@ -387,11 +391,12 @@ But we thought that client already has the Room DB set up then why can&rsquo;t w
 </script>
 <script>
     document.getElementById("theme-toggle").addEventListener("click", () => {
-        if (document.body.className.includes("dark")) {
-            document.body.classList.remove('dark');
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
             localStorage.setItem("pref-theme", 'light');
         } else {
-            document.body.classList.add('dark');
+            html.dataset.theme = 'dark';
             localStorage.setItem("pref-theme", 'dark');
         }
     })

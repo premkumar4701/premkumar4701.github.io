@@ -4,10 +4,18 @@
     <title>Prem Kumar J</title>
     <link>https://premkumar4701.github.io/</link>
     <description>Recent content on Prem Kumar J</description>
-    <generator>Hugo -- 0.139.2</generator>
+    <generator>Hugo -- 0.148.1</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 28 Nov 2024 18:03:04 +0530</lastBuildDate>
+    <lastBuildDate>Sun, 28 Dec 2025 09:42:36 +0530</lastBuildDate>
     <atom:link href="https://premkumar4701.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Room FTS Made Simple: What Really Happens in SQLite Behind the Scenes</title>
+      <link>https://premkumar4701.github.io/posts/android-fts-behind-room/</link>
+      <pubDate>Sun, 28 Dec 2025 09:42:36 +0530</pubDate>
+      <guid>https://premkumar4701.github.io/posts/android-fts-behind-room/</guid>
+      <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
+&lt;p&gt;I am starting with a question here, Has a android dev I used the FTS(Full Text Search) with room but ever thought about how it works behind the scenes ? What If suddenly another library takes over the room then we don&amp;rsquo;t know how to implement FTS it feels so bad right ? Exactly I felt the same the underling SQLite have not changed only the top layer changed which breaks our entire work flow. Nope I don&amp;rsquo;t want to allow that. So, I decide to go behind the room FTS annotation and How SQLite actually implements the FTS. So, We can make are foundation strong enough If the top layer drops still ok I can implemented the feature which gives more control and confidence. Let&amp;rsquo;s deep dive into it now.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Room Migration Handling for Android Libraries</title>
       <link>https://premkumar4701.github.io/posts/room-migration-handling-for-android-libraries/</link>
